@@ -1,0 +1,26 @@
+{
+  "author"       : "Henri Bouvier",
+  "name"         : "node-exception-collector",
+  "version"      : "1.0.0",
+  "description"  : "An exception collector",
+  "dependencies" : {
+    "express"          : "latest",
+    "socket.io"        : "latest",
+    "socket.io-client" : "latest",
+    "xml2js"           : "latest",
+    "step"             : "latest"
+  },
+  "devDependencies"      : {},
+  "optionalDependencies" : {},
+  "engines" : {
+      "node" : ">= 0.8.7",
+      "npm"  : ">= 1.1.0"
+  },
+  "repository" : {
+    "type" : "git",
+    "url"  : "git@domain.com:hbouvier/node-expcetion-collector.git"
+  },
+  "scripts" : {
+    "start" : "expcetion_collector.js"
+  }
+}

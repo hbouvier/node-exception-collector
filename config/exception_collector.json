@@ -1,0 +1,34 @@
+{
+    "http" : {
+        "active" : true,
+        "port"   : 80
+    },
+    "https" : {
+        "active" : false,
+        "port"   : 443
+    },
+    "socketioclient" : {
+        "active"   : false,
+        "protocol" : "http",
+        "host"     : "www.domain.com",
+        "port"     : 80
+    },
+    "socketioserver" : {
+        "active" : false
+    },
+    "udp" : {
+        "active" : false,
+        "port"   : 80
+    },
+    "auth" : {
+        "user"     : "admin",
+        "password" : "kajshdflkjashdf39475098lkjahsdfklj093485703298457okhasdf"
+    },
+    "routes" : {
+        "notices" : {
+            "debug"   : true,
+            "context" : "/notifier_api/v2/notices",
+            "version" : ""
+        }
+    }
+}
