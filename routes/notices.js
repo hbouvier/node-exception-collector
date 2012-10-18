@@ -10,6 +10,14 @@ module.exports = function (serverConfig, app, options) {
 
     /////////////////////////////////////////////////////////////////////////////////////////
     //
+    // REST - GET
+    //
+    function get(req, res) {
+        res.end('<html><body><pre>OK</pre></body></html>\n');
+    }
+    
+    /////////////////////////////////////////////////////////////////////////////////////////
+    //
     // REST - POST
     //
     function post(req, res) {
@@ -53,5 +61,6 @@ module.exports = function (serverConfig, app, options) {
     //
     // public HTTP(s)  routes
     //
+    app.get(context_, get);
     app.post(context_, post);
 };
