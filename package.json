@@ -9,6 +9,7 @@
     "socket.io-client" : "latest",
     "mongodb"          : "latest",
     "xml2js"           : "latest",
+    "crypto"           : "latest",
     "airbrake"         : "latest",
     "step"             : "latest"
   },

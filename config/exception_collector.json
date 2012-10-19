@@ -90,7 +90,7 @@
                                             "exception_id" : 1 
                                         },
                             "options" : {
-                                "unique"     : true,
+                                "unique"     : false,
                                 "background" : true, 
                                 "safe"       : true
                             }
@@ -101,7 +101,18 @@
                                             "category" : 1 
                                         },
                             "options" : {
-                                "unique"     : true,
+                                "unique"     : false,
+                                "background" : true, 
+                                "safe"       : true
+                            }
+                        },
+                        {
+                            "name"    : "updated",
+                            "order"   : { 
+                                            "updated" : 1 
+                                        },
+                            "options" : {
+                                "unique"     : false,
                                 "background" : true, 
                                 "safe"       : true
                             }

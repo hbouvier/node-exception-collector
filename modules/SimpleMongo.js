@@ -159,10 +159,12 @@ SimpleMongo.prototype = {
                     return next(err);
                 }
                 var key = (typeof(id) === "string") ? {'_id':new BSON.ObjectID(id)}: id;
+                $this.debug('id='+typeof(id));
                 collection.findOne(key, function (err, item) {
                     if (err) {
-                        $this.error(err, 'findOne|collection=' + collectionName + '|id=' + util.inspect(id) + '|err=');
-                    }
+                        $this.error(err, 'findOne|collection=' + collectionName + '|id=' + util.inspect(id) + '|key=' + key + '|err=');
+                    } else
+                        $this.debug('findOne|collection=' + collectionName + '|id=' + util.inspect(id) + '|key=' + key + '|item='+ util.inspect(item));
                     next(err, item);
                 });
             });
@@ -269,6 +271,29 @@ SimpleMongo.prototype = {
         }
     },
 
+    upserts: function (collectionName, criteria, data, options, next) {
+        var $this = this;
+        try {
+            if (typeof(options) === 'function') {
+                next    = options;
+                options = $this.config.options;
+            }
+            this.db.collection(collectionName, function (err, collection) {
+                if (err) {
+                    $this.error(err, 'upserts|collection=' + collectionName + '|criteria=' + util.inspect(criteria) + '|data=' + util.inspect(data) + '|err=');
+                    return next(err);
+                }
+                collection.update(criteria, data, options, function(err, item) {
+                    if (err) {
+                        $this.error(err, 'upserts|collection=' + collectionName + '|criteria=' + util.inspect(criteria) + '|data=' + util.inspect(data) + '|err=');
+                    }
+                    next(err, item);
+                });
+            });
+        } catch (exception) {
+            $this.exception(exception, 'upserts|collection=' + collectionName + '|criteria=' + util.inspect(criteria) + '|data=' + util.inspect(data) + '|exception=');
+        }
+    },
     
     /////////////////////////////////////////////////////////////////////////////////////////
     //
