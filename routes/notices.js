@@ -75,11 +75,11 @@ module.exports = function (serverConfig, app, options) {
                 res.end('</error>\n');
             } else {
                 util.log(util.inspect(xml));
-                ### util.log('notice version:' +  xml.notice.$.version); 
+                util.log('notice version:' +  xml.notice.$.version); 
                 util.log('notice.api-key:' +  xml.notice['api-key']); 
-                # util.log('notice.notifier.name:' +  xml.notice.notifier[0].name); 
-                ### util.log('notice.notifier.version:' +  xml.notice.notifier[0].version); 
-                ## util.log('notice.notifier.url:' +  xml.notice.notifier[0].url); 
+                util.log('notice.notifier.name:' +  xml.notice.notifier[0].name); 
+                util.log('notice.notifier.version:' +  xml.notice.notifier[0].version); 
+                util.log('notice.notifier.url:' +  xml.notice.notifier[0].url); 
                 util.log('notice.error.class:' +  xml.notice.error[0]['class']);  // java.lang.Exception
                 util.log('notice.error.message:' +  xml.notice.error[0].message); // El Kaboom!
                 util.log('notice.error.backtrace.line.method:' +  xml.notice.error[0].backtrace[0].line[0].$.method);
