@@ -32,7 +32,7 @@
         "databasename" : "airbreak",
         "host"         : "127.0.0.1",
         "port"         : 27017,
-        "debug"        : true,
+        "debug"        : false,
         "schema":{
             "collections" : [
                 {
@@ -124,12 +124,12 @@
     },
     "routes" : {
         "applications" : {
-            "debug"   : true,
+            "debug"   : false,
             "context" : "/notifier_api/v2/applications",
             "version" : ""
         },
         "notices" : {
-            "debug"   : true,
+            "debug"   : false,
             "context" : "/notifier_api/v2/notices",
             "version" : ""
         }

@@ -34,14 +34,14 @@ module.exports = function (serverConfig, app, options) {
         var parser = new xml2js.Parser();
         parser.parseString(req.body, function (err, xml) {
             if (err) {
-                util.log('PARSE ERROR:' + util.inspect(err));
+                if (debug_) util.log('PARSE ERROR:' + util.inspect(err));
                 res.writeHead(501, {'Content-Type': 'application/xml; charset=utf-8'});
                 res.write('<?xml version="1.0" encoding="UTF-8"?>\n');
                 res.write('<error>\n');
                 res.write(' INVALID REQUEST\n');
                 res.end('</error>\n');
             } else {
-                util.log('PARSE OK');
+                if (debug_) util.log('PARSE OK');
                 var client = {
                     version     : xml.notice.$.version,
                     apikey      : ''+xml.notice['api-key'],
@@ -49,18 +49,18 @@ module.exports = function (serverConfig, app, options) {
                     driverver   : xml.notice.notifier[0].version,
                     driverurl   : xml.notice.notifier[0].url
                 };
-                util.log('PARSE|client=' + util.inspect(client));
+                if (debug_) util.log('PARSE|client=' + util.inspect(client));
                 
                 api.clientAllowed(client.apikey, function (err, app) {
                     if (err || app === null) {
-                        util.log('api not allowed|err=' + util.inspect(err));
+                        if (debug_) util.log('api not allowed|err=' + util.inspect(err));
                         res.writeHead(501, {'Content-Type': 'application/xml; charset=utf-8'});
                         res.write('<?xml version="1.0" encoding="UTF-8"?>\n');
                         res.write('<error>\n');
                         res.write(' NOT ALLOWED\n');
                         res.end('</error>\n');
                     } else {
-                        util.log('api|OK');
+                        if (debug_) util.log('api|OK');
                         var exception = {
                             exceptionClass : xml.notice.error[0]['class'],  // java.lang.Exception
                             message        : xml.notice.error[0].message,   // El Kaput!
@@ -78,17 +78,17 @@ module.exports = function (serverConfig, app, options) {
                             };
                             exception.backtrace.push(backtrace);
                         }
-                        util.log('PARSE|exception=' + util.inspect(exception));
+                        if (debug_) util.log('PARSE|exception=' + util.inspect(exception));
                         api.publish(client, exception, function (err, result) {
                             if (err) {
-                                util.log('PUBLISH|err=' + util.inspect(err));
+                                if (debug_) util.log('PUBLISH|err=' + util.inspect(err));
                                 res.writeHead(501, {'Content-Type': 'application/xml; charset=utf-8'});
                                 res.write('<?xml version="1.0" encoding="UTF-8"?>\n');
                                 res.write('<error>\n');
                                 res.write(' ERROR\n');
                                 res.end('</error>\n');
                             } else {
-                                util.log('PUBLISH|OK');
+                                if (debug_) util.log('PUBLISH|OK');
                                 res.writeHead(201, {'Content-Type': 'application/xml; charset=utf-8'});
                                 res.write('<?xml version="1.0" encoding="UTF-8"?>\n');
                                 res.write('<notice>\n');

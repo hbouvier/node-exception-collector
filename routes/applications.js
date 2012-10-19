@@ -28,12 +28,13 @@ module.exports = function (serverConfig, app, options) {
                         res.end('{"err":'+ util.inspect(err) + ',"id"="'+obj.name+'"}');
                         return;
                     }
-                    util.log('insert result=' + util.inspect(result));
+                    if (debug_) util.log('insert result=' + util.inspect(result));
+                    
                     // -- Create the application exception collection
                     //
                     var template = serverConfig.mongo.template;
                     template.collections[0].name = 'app_' + result[0]._id;
-                    util.log('template=' + util.inspect(template));
+                    if (debug_) util.log('template=' + util.inspect(template));
                     mongo_.schema(template, function (err, ignoreme) {
                         if (err) {
                             res.writeHead(409, {'Content-Type': 'application/json'});

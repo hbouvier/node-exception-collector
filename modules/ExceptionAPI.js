@@ -102,7 +102,7 @@ ExceptionAPI.prototype = {
                                         $set : { updated : pretty }, 
                                         $inc : { count   : 1   }
                                     }, 
-                                    { upsert: true, safe:true }, 
+                                    { upsert: true, safe:false }, 
                                     this.parallel()
                 );
             },
@@ -117,7 +117,7 @@ ExceptionAPI.prototype = {
                                         $set : { updated : pretty }, 
                                         $inc : { count   : 1   }
                                     }, 
-                                    { upsert: true, safe:true }, 
+                                    { upsert: true, safe:false }, 
                                     this.parallel()
                 );
             },
@@ -132,7 +132,7 @@ ExceptionAPI.prototype = {
                                         $set : { updated : pretty }, 
                                         $inc : { count   :  1  }
                                     }, 
-                                    { upsert: true, safe:true }, 
+                                    { upsert: true, safe:false }, 
                                     this.parallel()
                 );
             },
@@ -149,19 +149,15 @@ ExceptionAPI.prototype = {
         exception.sha1 = sha1;
         if (this.exceptions_cache[sha1] === undefined) {
             this.mongo.findOne(this.exceptCollectionName, {sha1 : sha1}, function (err, item) {
-                $this.log('findone|err=' + util.inspect(err) + '|item=' + util.inspect(item));
                 if (err || item === null) {
                     // -- NO, create it
                     //
-                    $this.log('findone|err=' + util.inspect(err) + '|item=' + util.inspect(item) + '|createit');
                     exception.sha1 = sha1;
                     $this.mongo.insert($this.exceptCollectionName, exception, function (err, result) {
-                        $this.log('insert|err=' + util.inspect(err) + '|result=' + util.inspect(result));
                         if (err) {
                             $this.error(err, 'publish|exception=insert-FAILED|sha=' + sha1 + '|err=');
                             return next(err, null);
                         }
-                        $this.debug('publish|result=' + util.inspect(result));
                         $this.debug('publish|exception=' + result[0]._id + '|sha=' + sha1 + '|cache=miss|inserted');
                         exception._id = result[0]._id;
                         $this.exceptions_cache[sha1] = result[0]._id;

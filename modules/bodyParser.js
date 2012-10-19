@@ -1,6 +1,5 @@
 module.exports = (function() {
     function xml(req, res, next) {
-        console.log('xml:' + req.headers['content-type']);
         // ignore if body is already parsed or GET/HEAD request
         //
         if (req._body            || // body already parsed
