@@ -24,7 +24,106 @@
         "user"     : "admin",
         "password" : "kajshdflkjashdf39475098lkjahsdfklj093485703298457okhasdf"
     },
+    "airbrake" : {
+        "___apikey___" : "disabled"
+    },
+    "mongo" : {
+        "active"       : true,
+        "databasename" : "airbreak",
+        "host"         : "127.0.0.1",
+        "port"         : 27017,
+        "debug"        : true,
+        "schema":{
+            "collections" : [
+                {
+                    "name"    : "applications",
+                    "options" : {
+                                   "safe" : false
+                    },
+                    "indexes" : [
+                        {
+                            "name"    : "name", 
+                            "order"   : { 
+                                            "name" : 1 
+                                        },
+                            "options" : {
+                                "unique"     : true,
+                                "background" : true, 
+                                "dropDups"   : true,
+                                "safe"       : true
+                            }
+                        },
+                        {
+                            "name"    : "apikey", 
+                            "order"   : { 
+                                            "apikey" : 1 
+                                        },
+                            "options" : {
+                                "unique"     : true,
+                                "background" : true, 
+                                "safe"       : true
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name"    : "exceptions",
+                    "options" : {
+                                    "safe"   : false
+                                },
+                    "indexes" : [
+                        {
+                            "name"    : "sha1",
+                            "order"   : { 
+                                            "sha1" : 1 
+                                        },
+                            "options" : {
+                                "unique"     : true,
+                                "background" : true, 
+                                "safe"       : true
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        "template" : {
+            "name"    : "template",
+            "options" : {
+                            "safe"   : false
+                        },
+            "indexes" : [
+                {
+                    "name"    : "exception_id",
+                    "order"   : { 
+                                    "exception_id" : 1 
+                                },
+                    "options" : {
+                        "unique"     : true,
+                        "background" : true, 
+                        "safe"       : true
+                    }
+                },
+                {
+                    "name"    : "category",
+                    "order"   : { 
+                                    "category" : 1 
+                                },
+                    "options" : {
+                        "unique"     : true,
+                        "background" : true, 
+                        "safe"       : true
+                    }
+                }
+            ]
+        }
+    },
     "routes" : {
+        "applications" : {
+            "debug"   : true,
+            "context" : "/notifier_api/v2/applications",
+            "version" : ""
+        },
         "notices" : {
             "debug"   : true,
             "context" : "/notifier_api/v2/notices",

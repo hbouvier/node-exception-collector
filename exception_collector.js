@@ -6,27 +6,31 @@
 //
 //  Module dependencies.
 //
-var express    = require('express'),
-    http       = require('http'),
-    https      = require('https'),
-    dgram      = require('dgram'),
-    io         = require('socket.io'),
-    ioclient   = require('socket.io-client'),
-    udpServer  = dgram.createSocket('udp4'),
-    path       = require('path'),
-    util       = require('util'),
-    step       = require('step'),
-    fs         = require('fs'),
-    bodyParser = require('./modules/bodyParser');
+var express     = require('express'),
+    http        = require('http'),
+    https       = require('https'),
+    dgram       = require('dgram'),
+    io          = require('socket.io'),
+    ioclient    = require('socket.io-client'),
+    udpServer   = dgram.createSocket('udp4'),
+    path        = require('path'),
+    util        = require('util'),
+    step        = require('step'),
+    fs          = require('fs'),
+    SimpleMongo = require('./modules/SimpleMongo.js'),
+    bodyParser  = require('./modules/bodyParser');
     
+var mongo = new SimpleMongo();
+
 /////////////////////////////////////////////////////////////////////////////////////////
 //
 //  Configuration
 //
 var config              = JSON.parse(fs.readFileSync(path.join(__dirname, '/config/exception_collector.json')));
     config.version      = JSON.parse(fs.readFileSync(path.join(__dirname, 'package.json'))).version;
-    config.http.port    = process.env.PORT  || config.http.port,
-    config.https.port   = process.env.SPORT || config.https.port;
+    config.http.port    = process.env.PORT         || config.http.port,
+    config.https.port   = process.env.SPORT        || config.https.port,
+    config.mongo.url    = process.env.MONGOLAB_URI || config.mongo.url;
 
 /////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -112,7 +116,10 @@ step(
     //  Connect to the database
     //
     function connectToDatabase() {
-        return 'skip';
+        if (config.mongo.active) {
+            mongo.init(config.mongo);
+            mongo.connect(this);
+        } else return 'skip';
     },
 
     /////////////////////////////////////////////////////////////////////////////////////////
@@ -121,8 +128,10 @@ step(
     //
     function updateSchema(err, result) {
         if (err) throw err;
-        if (!result || result !== "skip") util.log('server|database|connected');
-        return 'skip';
+        if (!result || result !== 'skip') util.log('server|database|connected');
+        if (config.mongo.active) {
+            mongo.schema(config.mongo.schema, this);
+        } else return 'skip';
     },
 
     /////////////////////////////////////////////////////////////////////////////////////////
@@ -204,7 +213,7 @@ step(
     function startRouter(err, result) {
         if (err) throw err;
         if (!result || result !== "skip") util.log('server|http|udp|started|port='+config.udp.port);
-        require('./routes')(config, app, {socketIoServer:socketIoServer, socketIoClient:socketIoClient});
+        require('./routes')(config, app, {socketIoServer:socketIoServer, socketIoClient:socketIoClient, mongo:mongo});
         return 'OK';
     },
     function done(err, result) {
