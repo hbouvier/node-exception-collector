@@ -32,6 +32,14 @@ var config              = JSON.parse(fs.readFileSync(path.join(__dirname, '/conf
     config.https.port   = process.env.SPORT        || config.https.port,
     config.mongo.url    = process.env.MONGOLAB_URI || config.mongo.url;
 
+var regex_ = /^(\s*[^=\s]+)\s*=(.*)$/;
+process.argv.forEach(function (val, index, array) {
+    var capture = val.match(regex_);
+    if (capture !== null && capture[0] !== undefined && capture.length === 3) {
+        if (capture[1] === 'MONGOLAB_URI') config.mongo.url = capture[2];
+    }
+});
+
 /////////////////////////////////////////////////////////////////////////////////////////
 //
 //  Global variable initialization
