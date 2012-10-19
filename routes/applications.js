@@ -32,15 +32,16 @@ module.exports = function (serverConfig, app, options) {
                     // -- Create the application exception collection
                     //
                     var template = serverConfig.mongo.template;
-                    template.name = result.id;
-                    mongo_.schema(template, function (err, result) {
+                    template.collections[0].name = 'app_' + result[0]._id;
+                    util.log('template=' + util.inspect(template));
+                    mongo_.schema(template, function (err, ignoreme) {
                         if (err) {
                             res.writeHead(409, {'Content-Type': 'application/json'});
                             res.end('{"err":'+ util.inspect(err) + ',"id"="'+obj.name+'"}');
                             return;
                         } else {
                             res.writeHead(201, {'Content-Type': 'application/json'});
-                            res.end('{"application":"'+obj.name+'","apikey":"'+result.id+'","status":"' + 'OK' + '"}');
+                            res.end('{"application":"'+obj.name+'","apikey":"'+result[0]._id+'","status":"' + 'OK' + '"}');
                         }
                     });
 

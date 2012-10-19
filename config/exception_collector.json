@@ -52,17 +52,6 @@
                                 "dropDups"   : true,
                                 "safe"       : true
                             }
-                        },
-                        {
-                            "name"    : "apikey", 
-                            "order"   : { 
-                                            "apikey" : 1 
-                                        },
-                            "options" : {
-                                "unique"     : true,
-                                "background" : true, 
-                                "safe"       : true
-                            }
                         }
                     ]
                 },
@@ -87,33 +76,37 @@
                 }
             ]
         },
-        "template" : {
-            "name"    : "template",
-            "options" : {
-                            "safe"   : false
+        "template":{
+            "collections" : [
+                {
+                    "name"    : "id",
+                    "options" : {
+                                    "safe"   : false
+                                },
+                    "indexes" : [
+                        {
+                            "name"    : "exception_id",
+                            "order"   : { 
+                                            "exception_id" : 1 
+                                        },
+                            "options" : {
+                                "unique"     : true,
+                                "background" : true, 
+                                "safe"       : true
+                            }
                         },
-            "indexes" : [
-                {
-                    "name"    : "exception_id",
-                    "order"   : { 
-                                    "exception_id" : 1 
-                                },
-                    "options" : {
-                        "unique"     : true,
-                        "background" : true, 
-                        "safe"       : true
-                    }
-                },
-                {
-                    "name"    : "category",
-                    "order"   : { 
-                                    "category" : 1 
-                                },
-                    "options" : {
-                        "unique"     : true,
-                        "background" : true, 
-                        "safe"       : true
-                    }
+                        {
+                            "name"    : "category",
+                            "order"   : { 
+                                            "category" : 1 
+                                        },
+                            "options" : {
+                                "unique"     : true,
+                                "background" : true, 
+                                "safe"       : true
+                            }
+                        }
+                    ]
                 }
             ]
         }
