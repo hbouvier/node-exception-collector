@@ -43,7 +43,7 @@ SimpleMongo.prototype = {
                          host:         config.host          || '127.0.0.1',
                          port:         config.port          || 27017,
                          options:      config.options       || {safe:true},
-                         debug:        config.debug         || true,
+                         debug:        config.debug === undefined ? true : config.debug,
                          url:          config.url
                       };
         this.debug('config=' + util.inspect(this.config));
@@ -159,7 +159,6 @@ SimpleMongo.prototype = {
                     return next(err);
                 }
                 var key = (typeof(id) === "string") ? {'_id':new BSON.ObjectID(id)}: id;
-                $this.debug('id='+typeof(id));
                 collection.findOne(key, function (err, item) {
                     if (err) {
                         $this.error(err, 'findOne|collection=' + collectionName + '|id=' + util.inspect(id) + '|key=' + key + '|err=');

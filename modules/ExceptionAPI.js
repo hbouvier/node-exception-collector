@@ -37,7 +37,7 @@ ExceptionAPI.prototype = {
 
     init: function(config) {
         this.config = {
-                         debug: config.debug || true
+                         debug: config.debug === undefined ? false : config.debug
                       };
         this.mongo = config.mongo;
         this.appCollectionName = 'applications';

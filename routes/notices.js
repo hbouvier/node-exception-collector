@@ -7,7 +7,7 @@ var moduleName    = 'notices',
 
 module.exports = function (serverConfig, app, options) {
     var config_          = serverConfig.routes[moduleName],
-        debug_           = config_.debug        || false,
+        debug_           = config_.debug === undefined ? false : config_.debug,
         context_         = config_.context      || '',
         mongo_           = options.mongo,
         appCollection    = 'applications',
