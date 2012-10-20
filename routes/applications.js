@@ -4,7 +4,7 @@ var moduleName    = 'applications',
 
 module.exports = function (serverConfig, app, options) {
     var config_        = serverConfig.routes[moduleName],
-        debug_         = config_.debug === undefined ? false : config_.debug,
+        debug_         = config_.debug === undefined ? serverConfig.debug : config_.debug,
         context_       = config_.context      || '',
         mongo_         = options.mongo,
         collectionName = 'applications';

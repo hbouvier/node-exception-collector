@@ -6,7 +6,8 @@
 //
 //  Module dependencies.
 //
-var express     = require('express'),
+var nodetime = require('nodetime').profile(),
+    express     = require('express'),
     http        = require('http'),
     https       = require('https'),
     dgram       = require('dgram'),
@@ -33,12 +34,19 @@ process.argv.forEach(function (val, index, array) {
         process.env[capture[1]] = capture[2];
     }
 });
+process.setMaxListeners(0);  // Usefull with memjs
+
+if (undefined === process.env.NODE_ENV ||
+         (process.env.NODE_ENV !== 'production' && process.env.NODE_ENV !== 'development')) {
+    throw "USAGE:  NODE_ENV={production|development} exception_collector.js";
+}
 
 /////////////////////////////////////////////////////////////////////////////////////////
 //
 //  Configuration
 //
 var config              = JSON.parse(fs.readFileSync(path.join(__dirname, '/config/exception_collector.json')));
+    config.debug        = process.env.NODE_ENV === 'development';
     config.version      = JSON.parse(fs.readFileSync(path.join(__dirname, 'package.json'))).version;
     config.http.port    = process.env.PORT         || config.http.port,
     config.https.port   = process.env.SPORT        || config.https.port,
@@ -56,7 +64,7 @@ var app           = express();
 // Express configuration for ALL environment
 //
 app.configure(function () {
-    app.use(express.logger('default')); /* 'default', 'short', 'tiny', 'dev' */
+    app.use(express.logger( process.env.NODE_ENV === 'production' ? 'tiny' : 'short' )); /* 'default', 'short', 'tiny', 'dev' */
     app.use(express.bodyParser());
     app.use(express.methodOverride());
     app.use(bodyParser.xml);
@@ -104,6 +112,7 @@ app.configure(function () {
 //
 app.configure('development', function () {
     app.use(express.errorHandler({ dumpExceptions: true, showStack: true }));
+    config.debug = true;
 });
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -114,6 +123,7 @@ app.configure('production', function () {
     //  var oneYear = 31557600000;
     //  app.use(express.static(__dirname, { maxAge: oneYear }));
     app.use(express.errorHandler());
+    config.debug = false;
 });
 
 
@@ -130,6 +140,7 @@ step(
     //
     function connectToDatabase() {
         if (config.mongo.active) {
+            if (config.mongo.debug === undefined) config.mongo.debug = config.debug;
             mongo.init(config.mongo);
             mongo.connect(this);
         } else return 'skip';

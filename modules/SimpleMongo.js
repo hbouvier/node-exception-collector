@@ -43,7 +43,7 @@ SimpleMongo.prototype = {
                          host:         config.host          || '127.0.0.1',
                          port:         config.port          || 27017,
                          options:      config.options       || {safe:true},
-                         debug:        config.debug === undefined ? true : config.debug,
+                         debug:        config.debug === undefined ? false : config.debug,
                          url:          config.url
                       };
         this.debug('config=' + util.inspect(this.config));
@@ -66,7 +66,7 @@ SimpleMongo.prototype = {
                                new mongo.Server(this.config.host, 
                                                 this.config.port, 
                                                 {auto_reconnect: true}),
-                               {});
+                               {safe:false});
                                
         this.db.addListener('error', function (err) {
             $this.error(err, 'LISTENER:error|err=');

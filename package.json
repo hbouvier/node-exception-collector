@@ -4,6 +4,7 @@
   "version"      : "1.0.0",
   "description"  : "An exception collector",
   "dependencies" : {
+    "nodetime"         : "latest",
     "express"          : "latest",
     "socket.io"        : "latest",
     "socket.io-client" : "latest",
