@@ -2,7 +2,7 @@ var util       = require('util'),
     step       = require('step'),
     crypto     = require('crypto'),
     airbrake   = require('airbrake'),
-    memjs      = require('memjs'),
+    memjs      = require('./memcache'),
     moduleName = 'ExceptionAPI';
 
 var ExceptionAPI = function () {

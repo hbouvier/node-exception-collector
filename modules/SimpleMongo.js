@@ -113,7 +113,13 @@ SimpleMongo.prototype = {
     // ID
     //
     id: function(id) {
-        return new BSON.ObjectID(id);
+        var bsonid = id;
+        try {
+            bsonid = new BSON.ObjectID(id);
+        } catch (exception) {
+            this.error(exception, 'id:id=' + util.inspect(id) + '|exception=');
+        }
+        return bsonid
     },
 
     isDuplicate : function(err) {
