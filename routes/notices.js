@@ -44,7 +44,7 @@ module.exports = function (serverConfig, app, options) {
                 if (debug_) util.log('PARSE OK');
                 var client = {
                     version     : xml.notice.$.version,
-                    apikey      : ''+xml.notice['api-key'],
+                    apikey      : xml.notice['api-key'],
                     drivername  : xml.notice.notifier[0].name,
                     driverver   : xml.notice.notifier[0].version,
                     driverurl   : xml.notice.notifier[0].url
@@ -93,7 +93,7 @@ module.exports = function (serverConfig, app, options) {
                                 res.write('<?xml version="1.0" encoding="UTF-8"?>\n');
                                 res.write('<notice>\n');
                                 res.write(' <id>5080535a3a2714000b000001</id>\n');
-                                res.write(' <url>http://mmferrbit.herokuapp.com/locate/'+result+'</url>\n');
+                                res.write(' <url>http://mmferrbit.herokuapp.com/locate/123</url>\n');
                                 res.end('</notice>\n');
                             }
                         });

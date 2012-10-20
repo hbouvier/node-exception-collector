@@ -40,6 +40,7 @@ ExceptionAPI.prototype = {
         this.config = {
                          debug: config.debug === undefined ? false : config.debug
                       };
+this.config.debug = true;
         this.mongo = config.mongo;
         this.appCollectionName = 'applications';
         this.exceptCollectionName = 'exceptions';
@@ -56,7 +57,7 @@ ExceptionAPI.prototype = {
     //
     clientAllowed: function (apikey, next) {
         var $this = this;
-        
+        apikey = apikey.toString();
         this.memcache.get(apikey, function(err, value) {
             if (err) {
                 $this.error(err, 'clientAllowed|apikey='+apikey+'|err=');
@@ -95,9 +96,11 @@ ExceptionAPI.prototype = {
         var $this = this;
         var now = new Date();
         var pretty = $this._prettyDate(now);
+        var apikey = client.apikey.toString();
+        
         step(
             function yearly() {
-                $this.mongo.upserts('app_' + client.apikey,
+                $this.mongo.upserts('app_' + apikey,
                                     {
                                         exception_id : exception._id,
                                         category     : 'yearly',
@@ -112,7 +115,7 @@ ExceptionAPI.prototype = {
                 );
             },
             function monthly(err, result) {
-                $this.mongo.upserts('app_' + client.apikey, 
+                $this.mongo.upserts('app_' + apikey, 
                                     {
                                         exception_id : exception._id,
                                         category     : 'monthly',
@@ -127,7 +130,7 @@ ExceptionAPI.prototype = {
                 );
             },
             function dayly(err, result) {
-                $this.mongo.upserts('app_' + client.apikey, 
+                $this.mongo.upserts('app_' + apikey, 
                                     {
                                         exception_id : exception._id,
                                         category     : 'daily',
@@ -160,7 +163,7 @@ ExceptionAPI.prototype = {
             } else if (value) {
                 // -- got it, update the counters
                 $this.debug('publish|exception=' + value + 'sha=' + sha1 + '|cache=hit');
-                exception._id = value;
+                exception._id = JSON.parse(value);
                 return $this._updateCount(client, exception, next);
             }
             
@@ -181,7 +184,7 @@ ExceptionAPI.prototype = {
                                 }
                                 // -- OK, to it, update the counters
                                 $this.debug('publish|exception=' + item._id + '|sha=' + sha1 + '|cache=miss|fetched');
-                                $this.memcache.set(sha1, item._id);
+                                $this.memcache.set(sha1, JSON.stringify(item._id));
                                 exception._id = item._id;
                                 return $this._updateCount(client, exception, next);
                             });
@@ -192,13 +195,13 @@ ExceptionAPI.prototype = {
                         }
                         // -- OK, we inserted it, now lets update the counters
                         $this.debug('publish|exception=' + result[0]._id + '|sha=' + sha1 + '|cache=miss|inserted');
-                        $this.memcache.set(sha1, result[0]._id);
+                        $this.memcache.set(sha1, JSON.stringify(result[0]._id));
                         exception._id = result[0]._id;
                         $this._updateCount(client, exception, next);
                     });
                 } else {
                     $this.debug('publish|exception=' + item._id + '|sha=' + sha1 + '|cache=miss|fetched');
-                    $this.memcache.set(sha1, item._id);
+                    $this.memcache.set(sha1, JSON.stringify(item._id));
                     exception._id = item._id;
                     $this._updateCount(client, exception, next);
                 }
