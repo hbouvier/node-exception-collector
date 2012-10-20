@@ -40,7 +40,6 @@ ExceptionAPI.prototype = {
         this.config = {
                          debug: config.debug === undefined ? false : config.debug
                       };
-this.config.debug = true;
         this.mongo = config.mongo;
         this.appCollectionName = 'applications';
         this.exceptCollectionName = 'exceptions';
