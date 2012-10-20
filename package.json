@@ -8,6 +8,7 @@
     "socket.io"        : "latest",
     "socket.io-client" : "latest",
     "mongodb"          : "latest",
+    "memjs"            : "latest",
     "xml2js"           : "latest",
     "crypto"           : "latest",
     "airbrake"         : "latest",

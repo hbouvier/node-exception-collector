@@ -2,6 +2,7 @@ var util       = require('util'),
     step       = require('step'),
     crypto     = require('crypto'),
     airbrake   = require('airbrake'),
+    memjs      = require('memjs'),
     moduleName = 'ExceptionAPI';
 
 var ExceptionAPI = function () {
@@ -42,8 +43,7 @@ ExceptionAPI.prototype = {
         this.mongo = config.mongo;
         this.appCollectionName = 'applications';
         this.exceptCollectionName = 'exceptions';
-        this.applications_cache = {};
-        this.exceptions_cache = {};
+        this.memcache = memjs.Client.create();
         this.debug('config=' + util.inspect(this.config));
         if (config && config.airbrake && config.airbrake.apikey) {
             this.airbrake = airbrake.createClient(config.airbrake.apikey);
@@ -56,20 +56,25 @@ ExceptionAPI.prototype = {
     //
     clientAllowed: function (apikey, next) {
         var $this = this;
-        if (this.applications_cache[apikey]) {
-            $this.debug('clientAllowed|apikey='+apikey+'|OK|cache=hit');
-            return next(null);
-        }
-            
-        this.mongo.findOne(this.appCollectionName, apikey, function (err, item) {
+        
+        this.memcache.get(apikey, function(err, value) {
             if (err) {
-                $this.error(err, 'clientAllowed|apikey='+apikey+'|FAILED|err=');
-            } else if (item && item._id) {
-                $this.debug('clientAllowed|apikey='+apikey+'|OK|cache=miss|fetched|item='+item);
-                $this.applications_cache[apikey] = item;
-            } else
-                $this.debug('clientAllowed|apikey='+apikey+'|DENIED|cache=miss|NOT-FOUND|item='+item);
-            next(err, item);
+                $this.error(err, 'clientAllowed|apikey='+apikey+'|err=');
+            } else if (value) {
+                $this.debug('clientAllowed|apikey='+apikey+'|OK|cache=hit');
+                return next(null, JSON.parse(value));
+            }
+            $this.mongo.findOne($this.appCollectionName, apikey, function (err, item) {
+                if (err) {
+                    $this.error(err, 'clientAllowed|apikey='+apikey+'|FAILED|err=');
+                } else if (item && item._id) {
+                    $this.debug('clientAllowed|apikey='+apikey+'|OK|cache=miss|fetched|item='+item);
+                    $this.memcache.set(apikey, JSON.stringify(item));
+                } else
+                    $this.debug('clientAllowed|apikey='+apikey+'|DENIED|cache=miss|NOT-FOUND|item='+item);
+                next(err, item);
+            });
+            
         });
     },
     
@@ -147,33 +152,58 @@ ExceptionAPI.prototype = {
         var $this = this;
         var sha1 = this.sha1(JSON.stringify(exception));
         exception.sha1 = sha1;
-        if (this.exceptions_cache[sha1] === undefined) {
-            this.mongo.findOne(this.exceptCollectionName, {sha1 : sha1}, function (err, item) {
+        
+        // -- Try to find it in the cache
+        $this.memcache.get(sha1, function (err, value) {
+            if (err) {
+                $this.error(err, 'publish|sha1=' +  sha1 + '|cache=FAILED|err=');
+            } else if (value) {
+                // -- got it, update the counters
+                $this.debug('publish|exception=' + value + 'sha=' + sha1 + '|cache=hit');
+                exception._id = value;
+                return $this._updateCount(client, exception, next);
+            }
+            
+            // -- Not in the cache, lets try to find it in the database
+            $this.mongo.findOne($this.exceptCollectionName, {sha1 : sha1}, function (err, item) {
                 if (err || item === null) {
-                    // -- NO, create it
+                    // -- not there, create it
                     //
-                    exception.sha1 = sha1;
                     $this.mongo.insert($this.exceptCollectionName, exception, function (err, result) {
-                        if (err) {
+                        // -- GRRR, someone else inserted it at the same time and we lost!
+                        if ($this.mongo.isDuplicate(err)) {
+                            // -- Let's fetch it, since it is now in the database
+                            return $this.mongo.findOne($this.exceptCollectionName, {sha1 : sha1}, function (err, item) {
+                                // -- How unlucky are we, its not there... WTF
+                                if (err || item === null) {
+                                    $this.error(err, 'publish|exception=insert-FAILED|sha=' + sha1 + '|err=');
+                                    return next( err, item);
+                                }
+                                // -- OK, to it, update the counters
+                                $this.debug('publish|exception=' + item._id + '|sha=' + sha1 + '|cache=miss|fetched');
+                                $this.memcache.set(sha1, item._id);
+                                exception._id = item._id;
+                                return $this._updateCount(client, exception, next);
+                            });
+                        } else if (err) {
+                            // -- Ok, a real error, bail out
                             $this.error(err, 'publish|exception=insert-FAILED|sha=' + sha1 + '|err=');
                             return next(err, null);
                         }
+                        // -- OK, we inserted it, now lets update the counters
                         $this.debug('publish|exception=' + result[0]._id + '|sha=' + sha1 + '|cache=miss|inserted');
+                        $this.memcache.set(sha1, result[0]._id);
                         exception._id = result[0]._id;
-                        $this.exceptions_cache[sha1] = result[0]._id;
                         $this._updateCount(client, exception, next);
                     });
                 } else {
                     $this.debug('publish|exception=' + item._id + '|sha=' + sha1 + '|cache=miss|fetched');
+                    $this.memcache.set(sha1, item._id);
                     exception._id = item._id;
                     $this._updateCount(client, exception, next);
                 }
             });
-        } else {
-            $this.debug('publish|exception=' + this.exceptions_cache[sha1] + 'sha=' + sha1 + '|cache=hit');
-            exception._id = this.exceptions_cache[sha1];
-            $this._updateCount(client, exception, next);
-        }
+        });
     },
     
     sha1 : function (data) {

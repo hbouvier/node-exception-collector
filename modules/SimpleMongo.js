@@ -116,6 +116,10 @@ SimpleMongo.prototype = {
         return new BSON.ObjectID(id);
     },
 
+    isDuplicate : function(err) {
+        return (err && err.message.indexOf('E11000 ') !== -1);
+    },
+    
     /////////////////////////////////////////////////////////////////////////////////////////
     //
     // INSERT
@@ -133,7 +137,7 @@ SimpleMongo.prototype = {
                     return next(err);
                 }
                 collection.insert(data, options, function (err, objects) {
-                    if (err && err.message.indexOf('E11000 ') !== -1) {
+                    if ($this.isDuplicate(err)) {
                         $this.info('insert|collection=' + collectionName + '|data=' + util.inspect(data) + '|ALREADY-EXISTS');
                     } else if (err) {
                         $this.error(err, 'insert|collection=' + collectionName + '|data=' + util.inspect(data) + '|err=');
