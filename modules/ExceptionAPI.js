@@ -60,15 +60,15 @@ ExceptionAPI.prototype = {
         this.memcache.get('apikey:'+apikey, function(err, value) {
             if (err) {
                 $this.error(err, 'clientAllowed|apikey='+apikey+'|err=');
-            } else if (value) {
-                $this.debug('clientAllowed|apikey='+apikey+'|OK|cache=hit');
+            } else if (value && value.length !== 0) {
+                $this.debug('clientAllowed|apikey='+apikey+'|item=' + value +'|OK|cache=hit');
                 return next(null, JSON.parse(value));
             }
             $this.mongo.findOne($this.appCollectionName, apikey.toString(), function (err, item) {
                 if (err) {
                     $this.error(err, 'clientAllowed|apikey='+apikey+'|FAILED|err=');
                 } else if (item && item._id) {
-                    $this.debug('clientAllowed|apikey='+apikey+'|OK|cache=miss|fetched|item='+item);
+                    $this.debug('clientAllowed|apikey='+apikey+'|OK|cache=miss|fetched|item='+util.inspect(item));
                     $this.memcache.set('apikey:'+apikey, JSON.stringify(item));
                 } else
                     $this.debug('clientAllowed|apikey='+apikey+'|DENIED|cache=miss|NOT-FOUND|item='+item);
@@ -159,9 +159,9 @@ ExceptionAPI.prototype = {
         $this.memcache.get('exception:'+sha1, function (err, value) {
             if (err) {
                 $this.error(err, 'publish|sha1=' +  sha1 + '|cache=FAILED|err=');
-            } else if (value) {
+            } else if (value && value.length !== 0) {
                 // -- got it, update the counters
-                $this.debug('publish|exception=' + value + 'sha=' + sha1 + '|cache=hit');
+                $this.debug('publish|sha=' + sha1 + '|exception=' + util.inspect(value) + '|cache=hit');
                 exception._id = $this.mongo.id(value.toString());
                 return $this._updateCount(client, exception, next);
             }
