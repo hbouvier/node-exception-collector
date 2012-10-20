@@ -96,7 +96,7 @@ ExceptionAPI.prototype = {
         var now = new Date();
         var pretty = $this._prettyDate(now);
         var apikey = client.apikey.toString();
-        
+
         step(
             function yearly() {
                 $this.mongo.upserts('app_' + apikey,
@@ -162,7 +162,7 @@ ExceptionAPI.prototype = {
             } else if (value) {
                 // -- got it, update the counters
                 $this.debug('publish|exception=' + value + 'sha=' + sha1 + '|cache=hit');
-                exception._id = JSON.parse(value);
+                exception._id = $this.mongo.id(value);
                 return $this._updateCount(client, exception, next);
             }
             
@@ -183,7 +183,7 @@ ExceptionAPI.prototype = {
                                 }
                                 // -- OK, to it, update the counters
                                 $this.debug('publish|exception=' + item._id + '|sha=' + sha1 + '|cache=miss|fetched');
-                                $this.memcache.set(sha1, JSON.stringify(item._id));
+                                $this.memcache.set(sha1, item._id.toString());
                                 exception._id = item._id;
                                 return $this._updateCount(client, exception, next);
                             });
@@ -194,13 +194,13 @@ ExceptionAPI.prototype = {
                         }
                         // -- OK, we inserted it, now lets update the counters
                         $this.debug('publish|exception=' + result[0]._id + '|sha=' + sha1 + '|cache=miss|inserted');
-                        $this.memcache.set(sha1, JSON.stringify(result[0]._id));
+                        $this.memcache.set(sha1, result[0]._id.toString());
                         exception._id = result[0]._id;
                         $this._updateCount(client, exception, next);
                     });
                 } else {
                     $this.debug('publish|exception=' + item._id + '|sha=' + sha1 + '|cache=miss|fetched');
-                    $this.memcache.set(sha1, JSON.stringify(item._id));
+                    $this.memcache.set(sha1, item._id.toString());
                     exception._id = item._id;
                     $this._updateCount(client, exception, next);
                 }
