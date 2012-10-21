@@ -10,6 +10,7 @@
     "socket.io-client" : "latest",
     "mongodb"          : "latest",
     "memjs"            : "latest",
+    "redis-node"       : "latest",
     "xml2js"           : "latest",
     "crypto"           : "latest",
     "airbrake"         : "latest",

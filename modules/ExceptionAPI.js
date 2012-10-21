@@ -2,7 +2,7 @@ var util       = require('util'),
     step       = require('step'),
     crypto     = require('crypto'),
     airbrake   = require('airbrake'),
-    memjs      = require('./memcache'),
+    keystore   = require('./redis'),
     moduleName = 'ExceptionAPI';
 
 var ExceptionAPI = function () {
@@ -43,7 +43,7 @@ ExceptionAPI.prototype = {
         this.mongo = config.mongo;
         this.appCollectionName = 'applications';
         this.exceptCollectionName = 'exceptions';
-        this.memcache = memjs.Client.create();
+        this.memcache = keystore.Client.create();
         this.debug('config=' + util.inspect(this.config));
         if (config && config.airbrake && config.airbrake.apikey) {
             this.airbrake = airbrake.createClient(config.airbrake.apikey);
