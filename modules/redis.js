@@ -153,7 +153,7 @@ Redis.prototype.set = function(key, json, ttl, callback) {
     var $this = this;
     var ttlInSec = -1;
     
-    if (typeof(ttl) === 'function') {
+    if (typeof(ttl) === 'function' || ttl === undefined) {
         callback = ttl;
         ttl = undefined;
     } else {
