@@ -4,6 +4,7 @@
 var redis    = require('redis-node'),  // https://github.com/bnoguchi/redis-node.git
     url      = require('url'),
     util     = require('util'),
+    defaultttl = 1000.0,
     debug    = true;
 
 
@@ -150,11 +151,18 @@ Redis.prototype.publish = function(stream, json) {
 
 Redis.prototype.set = function(key, json, ttl, callback) {
     var $this = this;
-    var ttlInSec = parseFloat(ttl) / 1000.0;
-    if (ttlInSec < 1.0) {
-        ttlInSec = 1;
+    var ttlInSec = -1;
+    
+    if (typeof(ttl) === 'function') {
+        callback = ttl;
+        ttl = undefined;
     } else {
-        ttlInSec = parseInt(ttlInSec, 10);
+        ttlInSec = parseFloat(ttl) / 1000.0;
+        if (ttlInSec < 1.0) {
+            ttlInSec = 1;
+        } else {
+            ttlInSec = parseInt(ttlInSec, 10);
+        }
     }
     
     this.log('set|key=' + key + '|json=' + json + '|ttl=' + ttlInSec + ' seconds');
@@ -168,21 +176,27 @@ Redis.prototype.set = function(key, json, ttl, callback) {
             return;
         }
         $this.log('set|result=' + result);
-        $this.client.expire(key, ttlInSec, function(err, result) {
-            if (err) {
-                $this.log('expire|ERROR=' + util.inspect(err, true, null) +'|');
+        if (ttlInSec !== -1) {
+            $this.client.expire(key, ttlInSec, function(err, result) {
+                if (err) {
+                    $this.log('expire|ERROR=' + util.inspect(err, true, null) +'|');
+                    if (callback)
+                        process.nextTick(function() {
+                            callback(err, json);
+                        });
+                    return;
+                }
+                $this.log('expire|result=' + result);
                 if (callback)
                     process.nextTick(function() {
-                        callback(err, json);
+                        callback(null, json);
                     });
-                return;
-            }
-            $this.log('expire|result=' + result);
-            if (callback)
-                process.nextTick(function() {
-                    callback(null, json);
-                });
-        });
+            });
+        } else if (callback) {
+            process.nextTick(function() {
+                callback(null, json);
+            });
+        }
     });
 };
 
